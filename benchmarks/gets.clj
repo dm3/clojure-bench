@@ -1,5 +1,6 @@
 (ns gets
-  (:require [perforate.core :refer :all]))
+  (:require [perforate.core :refer :all]
+            [com.rpl.specter :as specter]))
 
 (set! *warn-on-reflection* true)
 
@@ -36,3 +37,13 @@
         ^clojure.lang.ILookup m (.valAt m :25)
         ret (.valAt m :35)]
     ret))
+
+(defcase get-nested :specter
+  [m]
+  (specter/select-one! [:5 :15 :25 :35] m))
+
+(def selector (specter/comp-paths :5 :15 :25 :35))
+
+(defcase get-nested :specter-compiled
+  [m]
+  (specter/compiled-select-one! selector m))
