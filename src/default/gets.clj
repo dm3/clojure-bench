@@ -1,6 +1,5 @@
 (ns gets
-  (:require [perforate.core :refer :all]
-            [com.rpl.specter :as specter]))
+  (:require [com.rpl.specter :as specter]))
 
 (set! *warn-on-reflection* true)
 
@@ -15,35 +14,31 @@
            [(keyword (str n)) n]))
        (into {})))
 
-(defgoal get-nested "Get a nested value in a map"
-  :setup (fn [] [(generate-map depth)]))
+(def m nil)
 
-(defcase get-nested :get-in
-  [m]
+(defn setup []
+  (alter-var-root #'m (constantly (generate-map depth))))
+
+(defn simple-get-in []
   (get-in m [:5 :15 :25 :35]))
 
-(defcase get-nested :get
-  [m]
+(defn nested-get []
   (get (get (get (get m :5) :15) :25) :35))
 
-(defcase get-nested :get-kw
-  [m]
+(defn nested-kw-access []
   (:35 (:25 (:15 (:5 m)))))
 
-(defcase get-nested :value-at
-  [^clojure.lang.ILookup m]
-  (let [^clojure.lang.ILookup m (.valAt m :5)
+(defn val-at []
+  (let [^clojure.lang.ILookup m (.valAt ^clojure.lang.ILookup m :5)
         ^clojure.lang.ILookup m (.valAt m :15)
         ^clojure.lang.ILookup m (.valAt m :25)
         ret (.valAt m :35)]
     ret))
 
-(defcase get-nested :specter
-  [m]
+(defn uncompiled-specter []
   (specter/select-one! [:5 :15 :25 :35] m))
 
 (def selector (specter/comp-paths :5 :15 :25 :35))
 
-(defcase get-nested :specter-compiled
-  [m]
+(defn compiled-specter []
   (specter/compiled-select-one! selector m))

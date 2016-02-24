@@ -1,6 +1,5 @@
-(ns entities
-  (:require [perforate.core :refer :all]
-            [datomic.api :as datomic]
+(ns entity-access
+  (:require [datomic.api :as datomic]
             [datomic-schema.schema :as s]))
 
 (set! *warn-on-reflection* true)
@@ -99,17 +98,16 @@
                   db order-id)
        (ffirst)))
 
-(defgoal entity-access "Various ways of accessing entity properties"
-  :setup (fn [] [(datomic/db (setup-datomic))]))
+(def db nil)
 
-(defcase entity-access :datoms-index
-  [db]
+(defn setup []
+  (alter-var-root #'db (constantly (datomic/db (setup-datomic)))))
+
+(defn datoms-index []
   (total-price-datoms db (order-id 50 50)))
 
-(defcase entity-access :sum-query-code
-  [db]
+(defn sum-query-code []
   (total-price-part-query db (order-id 50 50)))
 
-(defcase entity-access :sum-query
-  [db]
+(defn sum-query []
   (total-price-query db (order-id 50 50)))

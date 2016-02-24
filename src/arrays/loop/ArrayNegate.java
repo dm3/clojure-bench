@@ -1,4 +1,4 @@
-package bench;
+package loop;
 
 public class ArrayNegate {
     public static void bitNotArrayWhile(long[] arr) {
