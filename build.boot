@@ -37,7 +37,7 @@
 
 (def version "0.1.0-SNAPSHOT")
 
-(def deps '[[tulos/boot-criterium "0.3.0-SNAPSHOT"]
+(def deps '[[tulos/boot-criterium "0.3.0"]
             [org.clojure/clojure "1.7.0"]])
 
 (set-env! :dependencies deps)
