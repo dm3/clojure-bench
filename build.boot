@@ -30,48 +30,10 @@
       (.acquire (get data "semaphore"))
       (future (boot.App/runBoot core worker args)))))
 
-;;;;;;;;;;;;;;; with-pod-env
-
-(intern
-  (the-ns 'boot.core)
-  'resolve-dependencies? (atom true))
-
-(alter-var-root
-  #'boot.core/add-dependencies!
-  (fn [orig]
-    (fn [old new env]
-      (if @boot.core/resolve-dependencies? (orig old new env) new))))
-
-(defmacro with-pod-env
-  "Wraps a task with the provided environment. Only affects the resources
-  created when the task function is run.
-
-   (deftask bench-all []
-     (comp
-       (with-env {:dependencies '[[org.clojure/clojure \"1.7.0\"]]}
-         (bench :goal '(apply + (range 1000))))
-       (with-env {:dependencies '[[org.clojure/clojure \"1.6.0\"]]}
-         (bench :goal '(apply + (range 1000))))
-       (report :formatter 'table)))"
-  [env-map expr]
-  `(let [orig-env# (boot.core/get-env)
-         new-env# ~env-map]
-     (reset! boot.core/resolve-dependencies? false)
-     (apply boot.core/set-env! (mapcat identity new-env#))
-     (Thread/sleep 1000)
-     (let [result# ~expr]
-       (apply boot.core/set-env! (mapcat identity orig-env#))
-       (reset! boot.core/resolve-dependencies? true)
-       result#)))
-
 (defn mapply [f m]
   (apply f (apply concat m)))
 
-(defmacro with-merge-pod-env [env-map expr]
-  `(boot.user/with-env (boot.user/mapply boot.core/merge-env! ~env-map)
-     ~expr))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;; Benchmarks
 
 (def version "0.1.0-SNAPSHOT")
 
